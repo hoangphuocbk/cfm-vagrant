@@ -9,7 +9,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.ssh.insert_key = false
 
-    re_name  = "vqfx-re"
+    re_name  = "vqfx"
     pfe_name = "vqfx-pfe"
 
     ##############################
@@ -62,10 +62,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # Dataplane ports (Yes, dataplane ports are mapped on the RE and not PFE for vQFX10k)
         (1..2).each do |seg_id|
-           vqfx.vm.network 'private_network',
-            auto_config: false,
-            nic_type: '82540EM',
-            virtualbox__intnet: "#{UUID}_vqfx_seg#{seg_id}"
+            vqfx.vm.network 'private_network',
+                auto_config: false,
+                nic_type: '82540EM',
+                virtualbox__intnet: "#{UUID}_vqfx_seg#{seg_id}"
         end
 
     end
@@ -81,12 +81,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         $subnet_s_mgmt = "10.1.1"
         $subnet_s_ctrl_data= "10.60.17"
             (1..2).each do |s_id|
-              srv_name = ( "s-srv" + s_id.to_s ).to_sym
+              srv_name = ( "srv-" + s_id.to_s ).to_sym
                 config.vm.define srv_name do |srv|
                     srv.vm.box = "centos/7"
-                    srv.vm.hostname = "s-srv#{s_id}"
+                    srv.vm.hostname = "srv-#{s_id}"
                     srv.vm.network 'private_network',
-                       ip:"#{$subnet_s_mgmt}.#{s_id+9}",
+                       ip:"#{$subnet_s_mgmt}.#{s_id+100}",
                        netmask:"255.255.255.0"
 #                    srv.vm.network "public_network",
 #                      bridge: "br0",
@@ -95,7 +95,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     srv.vm.network 'private_network',
                       ip: "#{$subnet_s_ctrl_data}.#{s_id+100}",
                       nic_type: '82540EM',
-                      virtualbox__intnet: "#{UUID}_vqfx1_seg#{s_id}"
+                      virtualbox__intnet: "#{UUID}_vqfx_seg#{s_id}"
                     srv.ssh.insert_key = true
                     srv.vm.provision "shell", path: "scripts/enable_root_login.sh"
 #                   srv.vm.provision "shell", path: "scripts/set-centos-gw.sh"
